@@ -1,7 +1,7 @@
 {
   fetchFromGitHub,
   pkgs,
-  php83,
+  php84,
   lib,
   ...
 }: let
@@ -18,8 +18,8 @@ in
     src = fetchFromGitHub {
       owner = "inex";
       repo = pname;
-      tag = version;
-      sha256 = lib.fakeHash;
+      tag = "v${version}";
+      sha256 = "sha256-XT0QFv39482VkmvFXzvm1I2D+oIfgO8C+ko5dBwur7Q=";
     };
 
     vendorHash = lib.fakeHash;
@@ -35,7 +35,6 @@ in
       # dependencies
       rrdtool
       bgpq3
-      snmp
       mrtg
       perl
       perl540Packages.ConfigGeneral
