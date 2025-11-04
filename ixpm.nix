@@ -23,8 +23,8 @@ in
       sha256 = "sha256-XT0QFv39482VkmvFXzvm1I2D+oIfgO8C+ko5dBwur7Q=";
     };
 
-    vendorHash = lib.fakeHash;
-
+    vendorHash = "sha256-TlJ9qFbOGypOpX4VY9Rt1/aaIX9eYwPjGJ6MeRQODnI=";
+    
     php = phpPackage;
 
     buildInputs = with pkgs; [
