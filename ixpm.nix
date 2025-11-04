@@ -9,7 +9,8 @@
     enabled,
     all,
   }:
-    enabled ++ (with all; [memcached snmp intl curl rrd mbstring xml gd bcmath zip yaml memcache ds]));
+    # xml extension is handled by composer
+    enabled ++ (with all; [memcached snmp intl curl rrd mbstring gd bcmath zip yaml memcache ds]));
 in
   phpPackage.buildComposerProject2 rec {
     pname = "ixp-manager";
