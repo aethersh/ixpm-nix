@@ -16,12 +16,30 @@
   cfg = config.services.ixp-manager;
 
   settingsFormat = pkgs.formats.json {};
-  configJson = settingsFormat.generate "librenms-config.json" cfg.settings;
 
   package = cfg.package.override {
     logDir = cfg.logDir;
     dataDir = cfg.dataDir;
   };
+
+  phpOptions = ''
+    log_errors = on
+    post_max_size = 100M
+    upload_max_filesize = 100M
+    memory_limit = ${cfg.phpMemoryLimit}
+    date.timezone = "${config.time.timeZone}"
+  '';
+  phpIni =
+    pkgs.runCommand "php.ini"
+    {
+      inherit (package) phpPackage;
+      inherit phpOptions;
+      preferLocalBuild = true;
+      passAsFile = ["phpOptions"];
+    }
+    ''
+      cat $phpPackage/etc/php.ini $phpOptionsPath > $out
+    '';
 
   artisanWrapper = pkgs.writeShellScriptBin "ixpm-artisan" ''
     cd ${package}
@@ -30,14 +48,6 @@
       sudo='exec /run/wrappers/bin/sudo -u ${cfg.user}'
     fi
     $sudo ${package}/artisan "$@"
-  '';
-
-  configFile = pkgs.writeText "config.php" ''
-    <?php
-    $new_config = json_decode(file_get_contents("${cfg.dataDir}/config.json"), true);
-    $config = ($config == null) ? $new_config : array_merge($config, $new_config);
-
-    ${lib.optionalString (cfg.extraConfig != null) cfg.extraConfig}
   '';
 in {
   options.services.ixp-manager = {
@@ -88,6 +98,28 @@ in {
       '';
     };
 
+    hostname = mkOption {
+      type = types.str;
+      default = config.networking.fqdnOrHostName;
+      defaultText = literalExpression "config.networking.fqdnOrHostName";
+      description = ''
+        The hostname to serve IXP Manager on.
+      '';
+    };
+
+    #nginx = {
+    #enable = mkEnableOption "Serve IXP Manager with NGINX";
+    #};
+
+    #caddy = {
+    #  enable = mkEnableOption "Serve IXP Manager with Caddy";
+    #};
+
+    phpMemoryLimit = mkOption {
+      type = types.str;
+      default = "1024M";
+    };
+
     # TODO: Update `settings` and `extraConfig` options to reflect IXPM stuff
     settings = mkOption {
       type = types.submodule {
@@ -126,5 +158,37 @@ in {
     };
 
     users.groups.${cfg.group} = {};
+
+    services.nginx = lib.mkIf cfg.nginx.enable {
+      enable = true;
+      virtualHosts."${cfg.hostname}" = lib.mkMerge [
+        cfg.nginx
+        {
+          root = lib.mkForce "${package}/html";
+          locations."/" = {
+            index = "index.php";
+            tryFiles = "$uri $uri/ /index.php?$query_string";
+          };
+          locations."~ .php$".extraConfig = ''
+            fastcgi_pass unix:${config.services.phpfpm.pools."ixp-manager".socket};
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+          '';
+        }
+      ];
+    };
+
+    services.phpfpm.pools."ixp-manager" = {
+      user = cfg.user;
+      group = cfg.group;
+      inherit (package) phpPackage;
+      inherit phpOptions;
+      settings =
+        {
+          "listen.mode" = "0660";
+          "listen.owner" = config.services.nginx.user;
+          "listen.group" = config.services.nginx.group;
+        }
+        // cfg.poolConfig;
+    };
   };
 }
