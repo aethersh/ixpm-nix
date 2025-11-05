@@ -33,13 +33,17 @@
           default = pkgs.callPackage ./ixpm.nix {};
         };
 
-        devShells.default = pkgs.mkShell {
-            buildInputs = with pkgs; [
-              packages.default
-              packages.default.phpPackage
-              hello
-            ];
-          };
+        devShells.default = let
+          artisanWrapper = pkgs.writeShellScriptBin "ixpm-artisan" ''
+            cd ${packages.default}
+            ${packages.default}/artisan "$@"
+          '';
+        in (pkgs.mkShell {
+          buildInputs = with pkgs; [
+            packages.default.phpPackage # all the php dependencies
+            artisanWrapper # adds the librenms-artisan command
+          ];
+        });
       };
       flake = {
         # The usual flake attributes can be defined here, including system-
