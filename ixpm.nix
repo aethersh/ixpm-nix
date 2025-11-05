@@ -5,6 +5,7 @@
   lib,
   dataDir ? "/var/lib/ixp-manager",
   logDir ? "/var/log/ixp-manager",
+  cacheDir ? "/var/cache/ixp-manager",
   ...
 }: let
   phpPackage = php84.withExtensions ({
@@ -50,17 +51,14 @@ in
       mv $out/share/php/ixp-manager/* $out
       rm -r $out/share
 
-      #rm -rf $out/logs $out/rrd $out/bootstrap/cache $out/storage $out/.env
-      #ln -s ${logDir} $out/logs
-      #ln -s ${dataDir}/config.php $out/config.php
-      #ln -s ${dataDir}/.env $out/.env
-      #ln -s ${dataDir}/rrd $out/rrd
-      #ln -s ${dataDir}/storage $out/storage
-      #ln -s ${dataDir}/cache $out/bootstrap/cache
+      cp ${./artifacts/trustedproxy.php} config/trustedproxy.php
+
+      #rm -rf $out/storage/logs $out/bootstrap/cache $out/storage
+      ln -s ${logDir} $out/storage/logs
+      ln -s ${dataDir}/storage $out/storage
+      ln -s ${cacheDir} $out/bootstrap/cache
 
       #ls -l $out
-
-      php $out/artisan vendor:publish --provider="Fideloper\Proxy\TrustedProxyServiceProvider"
     '';
 
     passthru = {
