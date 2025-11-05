@@ -15,7 +15,11 @@
         #   2. Add foo as a parameter to the outputs function
         #   3. Add here: foo.flakeModule
       ];
-      systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        # "aarch64-darwin" "x86_64-darwin"
+      ];
       perSystem = {
         config,
         self',
@@ -50,7 +54,7 @@
         # agnostic ones like nixosModule and system-enumerating ones, although
         # those are more easily expressed in perSystem.
 
-        nixosModules.default = {...} : {
+        nixosModules.default = {...}: {
           imports = [./module.nix];
         };
       };
