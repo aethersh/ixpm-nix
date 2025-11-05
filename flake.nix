@@ -23,7 +23,7 @@
         pkgs,
         system,
         ...
-      }: {
+      }: rec {
         # Per-system attributes can be defined here. The self' and inputs'
         # module parameters provide easy access to attributes of the same
         # system.
@@ -32,6 +32,14 @@
         packages = rec {
           default = pkgs.callPackage ./ixpm.nix {};
         };
+
+        devShells.default = pkgs.mkShell {
+            buildInputs = with pkgs; [
+              packages.default
+              packages.default.phpPackage
+              hello
+            ];
+          };
       };
       flake = {
         # The usual flake attributes can be defined here, including system-
