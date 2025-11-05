@@ -57,9 +57,9 @@ in
       #ln -s ${dataDir}/rrd $out/rrd
       #ln -s ${dataDir}/storage $out/storage
       #ln -s ${dataDir}/cache $out/bootstrap/cache
-      
+
       #ls -l $out
-      
+
       php $out/artisan vendor:publish --provider="Fideloper\Proxy\TrustedProxyServiceProvider"
     '';
 
