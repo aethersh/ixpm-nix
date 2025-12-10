@@ -46,6 +46,8 @@ in
       perl540Packages.NetAddrIP
     ];
 
+    composerStrictValidation = false;
+
     postInstall = ''
       chmod -R u+w $out/share
       mv $out/share/php/ixp-manager/* $out
