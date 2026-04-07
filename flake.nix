@@ -45,7 +45,7 @@
         in (pkgs.mkShell {
           buildInputs = with pkgs; [
             packages.default.phpPackage # all the php dependencies
-            artisanWrapper # adds the librenms-artisan command
+            artisanWrapper # adds the ixpm-artisan command
           ];
         });
       };
