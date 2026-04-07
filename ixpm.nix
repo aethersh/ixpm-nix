@@ -17,7 +17,7 @@
 in
   phpPackage.buildComposerProject2 rec {
     pname = "ixp-manager";
-    version = "7.0.1";
+    version = "7.1.0";
 
     src = fetchFromGitHub {
       owner = "inex";
@@ -26,7 +26,7 @@ in
       sha256 = "sha256-XT0QFv39482VkmvFXzvm1I2D+oIfgO8C+ko5dBwur7Q=";
     };
 
-    vendorHash = "sha256-TlJ9qFbOGypOpX4VY9Rt1/aaIX9eYwPjGJ6MeRQODnI=";
+    vendorHash = "sha256-I414l+iLCzcjwDoeoIQPaNohJkgc52TIPZsaQYYMZmM=";
 
     php = phpPackage;
 
