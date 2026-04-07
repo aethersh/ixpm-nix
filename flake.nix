@@ -27,22 +27,27 @@
         pkgs,
         system,
         ...
-      }: rec {
+      }:
+
+     let
+       ixpmPackage =  pkgs.callPackage ./ixpm.nix {};
+       artisanWrapper = pkgs.writeShellScriptBin "ixpm-artisan" ''
+         cd ${ixpmPackage}
+         ${ixpmPackage}/artisan "$@"
+       '';
+     in rec {
         # Per-system attributes can be defined here. The self' and inputs'
         # module parameters provide easy access to attributes of the same
         # system.
         formatter = pkgs.alejandra;
         # Equivalent to  inputs'.nixpkgs.legacyPackages.hello;
         packages = rec {
-          default = pkgs.callPackage ./ixpm.nix {};
+          default = ixpmPackage;
+          ixpm = ixpmPackage;
+          ixpm-artisan = artisanWrapper;
         };
 
-        devShells.default = let
-          artisanWrapper = pkgs.writeShellScriptBin "ixpm-artisan" ''
-            cd ${packages.default}
-            ${packages.default}/artisan "$@"
-          '';
-        in (pkgs.mkShell {
+        devShells.default = (pkgs.mkShell {
           buildInputs = with pkgs; [
             packages.default.phpPackage # all the php dependencies
             artisanWrapper # adds the ixpm-artisan command
